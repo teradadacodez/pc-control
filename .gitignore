@@ -1,0 +1,9 @@
+.vscode/
+
+# Build output
+build/
+*.exe
+*.o
+
+# Local config - contains the auth token, never commit
+config.json
