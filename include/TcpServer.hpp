@@ -15,4 +15,4 @@ class tcpserver
     int m_port ; 
     SOCKET m_listensock ;
     bool m_wsaready ;
-}
+};

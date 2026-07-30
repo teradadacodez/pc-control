@@ -1,8 +1,9 @@
-#include <iostream>
-
-using namespace std; 
+#include "TcpServer.hpp"
 
 int main()
 {
-    cout << "hi" << endl;
+    tcpserver server(5000) ;
+    if(!server.start()) return 1 ;
+    server.run() ;
+    return 0 ;   
 }
