@@ -1,5 +1,5 @@
 #include "TcpServer.hpp"
-
+#include <string>
 #include <ws2tcpip.h>
 #include <iostream>
 
@@ -31,12 +31,12 @@ bool tcpserver::start()
         return false ;
     }
 
-    sockaddr_in server_addr ;
+    sockaddr_in server_addr{} ;
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(static_cast<u_short>(m_port)) ;
 
     // failure cases
-    if(inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr) != 1)
+    if(inet_pton(AF_INET, "0.0.0.0", &server_addr.sin_addr) != 1) // 0.0.0.0 means we are connected to accept connection from anywhere or bind to every ip on this machine !
     {
         std::cerr << "inet_pton() failed : " << WSAGetLastError() << std::endl;
         return false ;
@@ -54,7 +54,7 @@ bool tcpserver::start()
         return false ;
     }
 
-    std::cout << "listening on 127.0.0.1 : " << m_port << std::endl;
+    std::cout << "listening on 0.0.0.0 : " << m_port << std::endl;
     return true ;
 }
 
@@ -64,13 +64,17 @@ void tcpserver::run()
     {
         std::cout << "waiting for a client..." << std::endl;
 
-        SOCKET clientsock = accept(m_listensock, nullptr, nullptr) ;
+        sockaddr_in client_addr{} ;
+        int client_addr_size = sizeof(client_addr) ;
+        SOCKET clientsock = accept(m_listensock, reinterpret_cast<sockaddr*>(&client_addr), &client_addr_size) ;
         if(clientsock == INVALID_SOCKET)
         {
             std::cerr << "accept() failed : " << WSAGetLastError() << std::endl;
             continue;
         }
-        std::cout << "client connected" << std::endl;
+        char client_ip[INET_ADDRSTRLEN]{} ;
+        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip)) ;
+        std::cout << "client connected from : " << client_ip << " : " << ntohs(client_addr.sin_port) << std::endl;
 
         char buff[512];
         while(true)
